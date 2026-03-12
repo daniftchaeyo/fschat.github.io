@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>App de Mensajería MQTT</title>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 500px; margin: 20px auto;">
+
+    <h2>Chat Redes - Equipo</h2>
+    
+    <div id="mensajes" style="border: 1px solid #ccc; height: 300px; overflow-y: scroll; margin-bottom: 10px; padding: 10px;"></div>
+    
+    <input type="text" id="mensajeInput" placeholder="Escribe un mensaje..." style="width: 75%; padding: 5px;">
+    <button onclick="enviarMensaje()" style="padding: 5px 10px;">Enviar</button>
+
+    <script>
+        // Conexión al broker público usando WebSockets Seguros (wss)
+        const brokerUrl = 'wss://broker.hivemq.com:8884/mqtt';
+        
+        // ¡OJO AQUÍ! Cambien "equipo_dinamita" por el nombre de su equipo
+        const topic = 'Dani&Jovani'; 
+        
+        const client = mqtt.connect(brokerUrl);
+
+        client.on('connect', () => {
+            console.log('¡Conectado al broker!');
+            client.subscribe(topic);
+            document.getElementById('mensajes').innerHTML += `<p><i>Conectado al servidor...</i></p>`;
+        });
+
+        client.on('message', (topic, message) => {
+            const chat = document.getElementById('mensajes');
+            chat.innerHTML += `<p><b>Mensaje:</b> ${message.toString()}</p>`;
+            chat.scrollTop = chat.scrollHeight;
+        });
+
+        function enviarMensaje() {
+            const input = document.getElementById('mensajeInput');
+            const texto = input.value;
+            if (texto.trim() !== "") {
+                client.publish(topic, texto);
+                input.value = ''; 
+            }
+        }
+    </script>
+</body>
+</html>
