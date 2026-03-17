@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PingWave Chat</title>
+  <title>FSChat</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
     * {
@@ -14,7 +14,7 @@
 
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #f5f7fb, #e9eef7);
+      background: linear-gradient(135deg, #eef2ff, #fdf2f8);
       min-height: 100vh;
       display: flex;
       justify-content: center;
@@ -25,11 +25,11 @@
 
     .app {
       width: 100%;
-      max-width: 820px;
-      height: 88vh;
+      max-width: 860px;
+      height: 90vh;
       background: #ffffff;
       border-radius: 24px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.12);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -37,54 +37,48 @@
     }
 
     .header {
-      background: #ffffff;
-      border-bottom: 1px solid #eceff3;
-      padding: 22px 24px;
+      background: linear-gradient(90deg, #2563eb, #7c3aed);
+      color: white;
+      padding: 20px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .header h1 {
-      font-size: 30px;
-      font-weight: 700;
-      color: #111827;
+      font-size: 28px;
     }
 
     .estado {
       font-size: 14px;
-      color: #16a34a;
-      font-weight: 600;
+      font-weight: bold;
+      background: rgba(255,255,255,0.18);
+      padding: 8px 12px;
+      border-radius: 999px;
     }
 
     .topbar {
-      padding: 16px 24px;
-      background: #f9fafb;
-      border-bottom: 1px solid #eceff3;
       display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px 20px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e5e7eb;
     }
 
     .topbar input {
-      padding: 14px 16px;
-      border: 1px solid #d1d5db;
+      flex: 1;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
       border-radius: 14px;
-      font-size: 15px;
       outline: none;
-      background: #ffffff;
-      color: #111827;
-    }
-
-    #nombreInput {
-      width: 240px;
+      font-size: 15px;
     }
 
     #mensajes {
       flex: 1;
       overflow-y: auto;
-      padding: 24px;
-      background: linear-gradient(to bottom, #f9fbff, #f3f6fb);
+      padding: 20px;
+      background: linear-gradient(to bottom, #f8fafc, #eff6ff);
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -92,128 +86,188 @@
 
     .sistema {
       align-self: center;
-      background: #eef2ff;
-      color: #4f46e5;
+      background: #dbeafe;
+      color: #1d4ed8;
       padding: 10px 16px;
       border-radius: 999px;
       font-size: 13px;
-      font-weight: 600;
-      border: 1px solid #c7d2fe;
+      font-weight: bold;
     }
 
     .mensaje {
-      max-width: 75%;
-      padding: 14px 16px;
+      max-width: 76%;
+      padding: 12px 14px;
       border-radius: 18px;
-      line-height: 1.45;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
       word-wrap: break-word;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    }
+
+    .mensaje.mio {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: white;
+      border-bottom-right-radius: 6px;
     }
 
     .mensaje.otro {
       align-self: flex-start;
       background: #ffffff;
-      border: 1px solid #e5e7eb;
       color: #111827;
+      border: 1px solid #dbeafe;
       border-bottom-left-radius: 6px;
-    }
-
-    .mensaje.mio {
-      align-self: flex-end;
-      background: #111827;
-      color: #ffffff;
-      border-bottom-right-radius: 6px;
     }
 
     .usuario {
       display: block;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: bold;
       margin-bottom: 6px;
-      opacity: 0.8;
+      opacity: 0.9;
     }
 
     .hora {
       display: block;
-      font-size: 11px;
       margin-top: 8px;
-      opacity: 0.7;
+      font-size: 11px;
+      opacity: 0.8;
       text-align: right;
     }
 
-    .input-area {
-      display: flex;
-      gap: 12px;
-      padding: 18px 24px;
+    .barra-envio {
+      padding: 16px;
       background: #ffffff;
-      border-top: 1px solid #eceff3;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+
+    .fila-controles {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .icon-btn {
+      width: 46px;
+      height: 46px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 20px;
+      background: #eef2ff;
+      color: #3730a3;
+      transition: 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: #ddd6fe;
     }
 
     #mensajeInput {
       flex: 1;
-      padding: 16px 18px;
-      border: 1px solid #d1d5db;
+      padding: 14px 16px;
+      border: 1px solid #cbd5e1;
       border-radius: 16px;
       outline: none;
       font-size: 15px;
-      background: #f9fafb;
+      background: #f8fafc;
     }
 
-    #mensajeInput:focus,
-    #nombreInput:focus {
-      border-color: #111827;
-    }
-
-    button {
-      background: #111827;
-      color: #ffffff;
+    .btn-enviar {
+      padding: 0 22px;
+      height: 46px;
       border: none;
-      border-radius: 16px;
-      padding: 0 24px;
-      font-size: 15px;
-      font-weight: 700;
+      border-radius: 14px;
+      background: linear-gradient(90deg, #2563eb, #7c3aed);
+      color: white;
+      font-weight: bold;
       cursor: pointer;
-      transition: 0.2s ease;
     }
 
-    button:hover {
-      background: #374151;
+    .btn-enviar:hover {
+      opacity: 0.92;
+    }
+
+    .emoji-panel {
+      display: none;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+    }
+
+    .emoji {
+      font-size: 24px;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 10px;
+    }
+
+    .emoji:hover {
+      background: #e0e7ff;
+    }
+
+    .mensaje img {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 6px;
+    }
+
+    .mensaje video {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 6px;
+    }
+
+    .archivo-box {
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.16);
+    }
+
+    .mensaje.otro .archivo-box {
+      background: #eff6ff;
+    }
+
+    .archivo-box a {
+      color: inherit;
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    .nota {
+      font-size: 12px;
+      color: #64748b;
+      padding-left: 4px;
     }
 
     @media (max-width: 700px) {
       .app {
-        height: 94vh;
+        height: 95vh;
         border-radius: 18px;
       }
 
       .header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 6px;
-      }
-
-      .header h1 {
-        font-size: 24px;
-      }
-
-      .topbar {
-        flex-direction: column;
-      }
-
-      #nombreInput {
-        width: 100%;
-      }
-
-      .input-area {
-        flex-direction: column;
-      }
-
-      button {
-        height: 52px;
+        gap: 8px;
       }
 
       .mensaje {
-        max-width: 90%;
+        max-width: 92%;
+      }
+
+      .fila-controles {
+        flex-wrap: wrap;
+      }
+
+      #mensajeInput {
+        width: 100%;
       }
     }
   </style>
@@ -221,7 +275,7 @@
 <body>
   <div class="app">
     <div class="header">
-      <h1>PingWave Chat</h1>
+      <h1>FSChat</h1>
       <div class="estado" id="estadoConexion">● Conectando...</div>
     </div>
 
@@ -230,22 +284,53 @@
     </div>
 
     <div id="mensajes">
-      <div class="sistema">Bienvenido al chat</div>
+      <div class="sistema">Bienvenido a FSChat</div>
     </div>
 
-    <div class="input-area">
-      <input type="text" id="mensajeInput" placeholder="Escribe un mensaje..." />
-      <button onclick="enviarMensaje()">Enviar</button>
+    <div class="barra-envio">
+      <div id="emojiPanel" class="emoji-panel">
+        <span class="emoji">😀</span>
+        <span class="emoji">😂</span>
+        <span class="emoji">😍</span>
+        <span class="emoji">🥹</span>
+        <span class="emoji">😎</span>
+        <span class="emoji">🔥</span>
+        <span class="emoji">❤️</span>
+        <span class="emoji">👍</span>
+        <span class="emoji">👀</span>
+        <span class="emoji">🎉</span>
+        <span class="emoji">😔</span>
+        <span class="emoji">🤝</span>
+        <span class="emoji">🙏</span>
+        <span class="emoji">💯</span>
+        <span class="emoji">✨</span>
+      </div>
+
+      <div class="fila-controles">
+        <button class="icon-btn" id="emojiBtn" title="Emojis">😊</button>
+        <button class="icon-btn" id="adjuntarBtn" title="Adjuntar archivo">📎</button>
+        <input type="file" id="archivoInput" hidden />
+        <input type="text" id="mensajeInput" placeholder="Escribe un mensaje..." />
+        <button class="btn-enviar" onclick="enviarMensaje()">Enviar</button>
+      </div>
+
+      <div class="nota">Se recomiendan imágenes, videos cortos y archivos pequeños.</div>
     </div>
   </div>
 
   <script>
     const brokerUrl = "wss://broker.hivemq.com:8884/mqtt";
-    const topic = "pingwave/chat/sala1";
+    const topic = "fschatsala/general";
 
     const client = mqtt.connect(brokerUrl);
     const mensajes = document.getElementById("mensajes");
     const estadoConexion = document.getElementById("estadoConexion");
+    const mensajeInput = document.getElementById("mensajeInput");
+    const nombreInput = document.getElementById("nombreInput");
+    const emojiBtn = document.getElementById("emojiBtn");
+    const emojiPanel = document.getElementById("emojiPanel");
+    const archivoInput = document.getElementById("archivoInput");
+    const adjuntarBtn = document.getElementById("adjuntarBtn");
 
     client.on("connect", () => {
       estadoConexion.textContent = "● Conectado";
@@ -254,33 +339,33 @@
     });
 
     client.on("error", () => {
-      estadoConexion.textContent = "● Error de conexión";
+      estadoConexion.textContent = "● Error";
     });
 
     client.on("message", (topic, message) => {
       try {
         const data = JSON.parse(message.toString());
-        const miNombre = document.getElementById("nombreInput").value.trim();
+        const miNombre = nombreInput.value.trim();
         const esMio = data.usuario === miNombre;
-        agregarMensaje(data.usuario, data.texto, esMio, data.hora);
+        renderMensaje(data, esMio);
       } catch (e) {
-        agregarMensaje("Usuario", message.toString(), false, obtenerHoraActual());
+        agregarSistema("Llegó un mensaje no válido");
       }
     });
 
     function enviarMensaje() {
-      const nombre = document.getElementById("nombreInput").value.trim();
-      const mensajeInput = document.getElementById("mensajeInput");
+      const nombre = nombreInput.value.trim();
       const texto = mensajeInput.value.trim();
 
-      if (nombre === "") {
+      if (!nombre) {
         alert("Primero escribe tu nombre");
         return;
       }
 
-      if (texto === "") return;
+      if (!texto) return;
 
       const payload = {
+        tipo: "texto",
         usuario: nombre,
         texto: texto,
         hora: obtenerHoraActual()
@@ -290,14 +375,97 @@
       mensajeInput.value = "";
     }
 
-    function agregarMensaje(usuario, texto, esMio, hora) {
+    emojiBtn.addEventListener("click", () => {
+      emojiPanel.style.display = emojiPanel.style.display === "flex" ? "none" : "flex";
+    });
+
+    document.querySelectorAll(".emoji").forEach(emoji => {
+      emoji.addEventListener("click", () => {
+        mensajeInput.value += emoji.textContent;
+        mensajeInput.focus();
+      });
+    });
+
+    adjuntarBtn.addEventListener("click", () => {
+      archivoInput.click();
+    });
+
+    archivoInput.addEventListener("change", () => {
+      const archivo = archivoInput.files[0];
+      if (!archivo) return;
+
+      const nombre = nombreInput.value.trim();
+      if (!nombre) {
+        alert("Primero escribe tu nombre");
+        archivoInput.value = "";
+        return;
+      }
+
+      const maxSize = 700 * 1024;
+      if (archivo.size > maxSize) {
+        alert("El archivo es muy grande. Usa uno menor a 700 KB.");
+        archivoInput.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const base64 = e.target.result;
+
+        let tipo = "archivo";
+        if (archivo.type.startsWith("image/")) tipo = "imagen";
+        else if (archivo.type.startsWith("video/")) tipo = "video";
+
+        const payload = {
+          tipo: tipo,
+          usuario: nombre,
+          nombreArchivo: archivo.name,
+          mimeType: archivo.type,
+          contenido: base64,
+          hora: obtenerHoraActual()
+        };
+
+        client.publish(topic, JSON.stringify(payload));
+      };
+
+      reader.readAsDataURL(archivo);
+      archivoInput.value = "";
+    });
+
+    function renderMensaje(data, esMio) {
       const div = document.createElement("div");
       div.className = `mensaje ${esMio ? "mio" : "otro"}`;
-      div.innerHTML = `
-        <span class="usuario">${usuario}</span>
-        <div>${texto}</div>
-        <span class="hora">${hora}</span>
+
+      let contenidoHTML = `
+        <span class="usuario">${escapeHTML(data.usuario || "Usuario")}</span>
       `;
+
+      if (data.tipo === "texto") {
+        contenidoHTML += `<div>${escapeHTML(data.texto || "")}</div>`;
+      } else if (data.tipo === "imagen") {
+        contenidoHTML += `
+          <div>📷 ${escapeHTML(data.nombreArchivo || "Imagen")}</div>
+          <img src="${data.contenido}" alt="imagen enviada">
+        `;
+      } else if (data.tipo === "video") {
+        contenidoHTML += `
+          <div>🎥 ${escapeHTML(data.nombreArchivo || "Video")}</div>
+          <video controls src="${data.contenido}"></video>
+        `;
+      } else if (data.tipo === "archivo") {
+        contenidoHTML += `
+          <div class="archivo-box">
+            📎 Archivo: ${escapeHTML(data.nombreArchivo || "archivo")}
+            <br>
+            <a href="${data.contenido}" download="${escapeHTML(data.nombreArchivo || "archivo")}">Descargar</a>
+          </div>
+        `;
+      }
+
+      contenidoHTML += `<span class="hora">${escapeHTML(data.hora || obtenerHoraActual())}</span>`;
+      div.innerHTML = contenidoHTML;
+
       mensajes.appendChild(div);
       mensajes.scrollTop = mensajes.scrollHeight;
     }
@@ -315,7 +483,16 @@
       return ahora.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
 
-    document.getElementById("mensajeInput").addEventListener("keypress", function(e) {
+    function escapeHTML(texto) {
+      return texto
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    mensajeInput.addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
         enviarMensaje();
       }
