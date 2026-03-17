@@ -1,48 +1,106 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>App de Mensajería MQTT</title>
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<meta charset="UTF-8">
+<title>PingWave Chat</title>
+
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+<style>
+body{
+font-family: Arial;
+max-width:600px;
+margin:auto;
+}
+
+#chat{
+border:1px solid #ccc;
+height:350px;
+overflow-y:auto;
+padding:10px;
+background:#f5f5f5;
+}
+
+.mensaje{
+margin:5px 0;
+}
+
+.usuario{
+font-weight:bold;
+color:#2b7cff;
+}
+
+input{
+padding:6px;
+margin-top:5px;
+}
+</style>
+
 </head>
-<body style="font-family: Arial, sans-serif; max-width: 500px; margin: 20px auto;">
+<body>
 
-    <h2>Chat Redes - Equipo</h2>
-    
-    <div id="mensajes" style="border: 1px solid #ccc; height: 300px; overflow-y: scroll; margin-bottom: 10px; padding: 10px;"></div>
-    
-    <input type="text" id="mensajeInput" placeholder="Escribe un mensaje..." style="width: 75%; padding: 5px;">
-    <button onclick="enviarMensaje()" style="padding: 5px 10px;">Enviar</button>
+<h2>PingWave Chat</h2>
 
-    <script>
-        // Conexión al broker público usando WebSockets Seguros (wss)
-        const brokerUrl = 'wss://broker.hivemq.com:8884/mqtt';
-        
-        // ¡OJO AQUÍ! Cambien "equipo_dinamita" por el nombre de su equipo
-        const topic = 'Dani&Jovani'; 
-        
-        const client = mqtt.connect(brokerUrl);
+<input id="usuario" placeholder="Tu nombre">
 
-        client.on('connect', () => {
-            console.log('¡Conectado al broker!');
-            client.subscribe(topic);
-            document.getElementById('mensajes').innerHTML += `<p><i>Conectado al servidor...</i></p>`;
-        });
+<div id="chat"></div>
 
-        client.on('message', (topic, message) => {
-            const chat = document.getElementById('mensajes');
-            chat.innerHTML += `<p><b>Mensaje:</b> ${message.toString()}</p>`;
-            chat.scrollTop = chat.scrollHeight;
-        });
+<input id="mensaje" placeholder="Escribe un mensaje..." style="width:80%">
+<button onclick="enviar()">Enviar</button>
 
-        function enviarMensaje() {
-            const input = document.getElementById('mensajeInput');
-            const texto = input.value;
-            if (texto.trim() !== "") {
-                client.publish(topic, texto);
-                input.value = ''; 
-            }
-        }
+<script>
+
+const broker = 'wss://broker.hivemq.com:8884/mqtt'
+const topic = 'pingwave/chat/global'
+
+const client = mqtt.connect(broker)
+
+const chat = document.getElementById("chat")
+
+client.on('connect', ()=>{
+    agregarSistema("Conectado al servidor")
+    client.subscribe(topic)
+})
+
+client.on('message',(topic,message)=>{
+
+    const data = JSON.parse(message.toString())
+
+    chat.innerHTML += `
+    <div class="mensaje">
+        <span class="usuario">${data.usuario}:</span>
+        ${data.texto}
+    </div>
+    `
+
+    chat.scrollTop = chat.scrollHeight
+})
+
+function enviar(){
+
+    const usuario = document.getElementById("usuario").value
+    const texto = document.getElementById("mensaje").value
+
+    if(usuario=="" || texto=="") return
+
+    const mensaje = {
+        usuario: usuario,
+        texto: texto
+    }
+
+    client.publish(topic,JSON.stringify(mensaje))
+
+    document.getElementById("mensaje").value=""
+}
+
+function agregarSistema(texto){
+chat.innerHTML += `<p><i>${texto}</i></p>`
+}
+
+</script>
+
+</body>
+</html>
     </script>
 </body>
 </html>
